@@ -1,11 +1,14 @@
 package com.mat.proexpense_backend.entitties;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
+import org.hibernate.annotations.ColumnDefault;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mat.proexpense_backend.enums.PaymentMethod;
 import com.mat.proexpense_backend.validation.InstallmentPlan;
 import com.mat.proexpense_backend.validation.ValidInstallments;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -89,9 +92,16 @@ public class Expense implements InstallmentPlan {
   @NotNull
   private PaymentMethod paymentMethod;
 
+  @NotNull
+  private LocalDate expenseDate;
+
   private boolean isInInstallments;
 
   private int installmentsNumber;
+
+  @ColumnDefault("0")
+  @Column(nullable = false)
+  private int currentInstallment;
 
   @Override
   @JsonProperty("isInInstallments")

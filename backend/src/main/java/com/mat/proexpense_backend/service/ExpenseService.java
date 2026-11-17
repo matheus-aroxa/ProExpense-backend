@@ -1,5 +1,10 @@
 package com.mat.proexpense_backend.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,10 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import com.mat.proexpense_backend.dto.request.AccountAccessRequest;
 import com.mat.proexpense_backend.dto.request.RegisterExpenseRequest;
+import com.mat.proexpense_backend.dto.request.UpdateExpenseRequest;
 import com.mat.proexpense_backend.dto.response.ExpenseResponse;
 import com.mat.proexpense_backend.entitties.Card;
 import com.mat.proexpense_backend.entitties.Category;
 import com.mat.proexpense_backend.entitties.Expense;
+import com.mat.proexpense_backend.enums.PaymentMethod;
+import com.mat.proexpense_backend.enums.RecurrenceUnit;
 import com.mat.proexpense_backend.repository.AccountRepository;
 import com.mat.proexpense_backend.repository.CardRepository;
 import com.mat.proexpense_backend.repository.CategoryRepository;
@@ -21,6 +29,9 @@ import com.mat.proexpense_backend.repository.UserRepository;
 
 @Service
 public class ExpenseService {
+
+  private static final RecurrenceUnit DEFAULT_RECURRENCE_UNIT = RecurrenceUnit.MONTHS;
+  private static final int DEFAULT_RECURRENCE_INTERVAL = 1;
 
   private final ExpenseRepository repository;
   private final AccountService accountService;
@@ -51,41 +62,127 @@ public class ExpenseService {
   }
 
   public ExpenseResponse findExpenseById(UUID id) {
-    return this.repository.findById(id)
-        .map(ExpenseResponse::from)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Despesa não encontrada"));
+    return ExpenseResponse.from(this.findExpense(id));
   }
 
   @Transactional
   public ExpenseResponse registerExpense(RegisterExpenseRequest request) {
+    this.ensureInstallmentsAreOnCredit(request.isInInstallments(), request.paymentMethod());
+
     AccountAccessRequest accessRequest = new AccountAccessRequest(request.ownerId(), request.accountId());
     if (!this.accountService.hasAccessToTheAccount(accessRequest).hasAccess()) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário não tem acesso à conta");
     }
 
-    Category category = null;
-    if (request.categoryId() != null) {
-      category = this.categoryRepository.findById(request.categoryId())
-          .filter(found -> found.getAccount().getId().equals(request.accountId()))
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria não encontrada na conta"));
+    Category category = this.resolveCategory(request.categoryId(), request.accountId(), null);
+    Card card = this.resolveCard(request.cardId(), request.accountId(), null);
+    this.ensureCardSupports(card, request.paymentMethod());
 
-      if (!category.isActive()) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A categoria está inativa");
-      }
+    if (!request.isInInstallments()) {
+      Expense expense = this.newExpense(request, category, card, request.amount(), request.expenseDate());
+      return ExpenseResponse.from(this.repository.save(expense));
     }
 
-    Card card = this.cardRepository.findById(request.cardId())
-        .filter(found -> found.getAccount().getId().equals(request.accountId()))
+    int installmentsNumber = request.installmentsNumber();
+    List<BigDecimal> amounts = this.splitAmount(request.amount(), installmentsNumber);
+    List<LocalDate> dates = this.installmentDates(request);
+
+    List<Expense> installments = new ArrayList<>();
+    for (int index = 0; index < installmentsNumber; index++) {
+      Expense installment = this.newExpense(request, category, card, amounts.get(index), dates.get(index));
+      installment.setCurrentInstallment(index + 1);
+      installments.add(installment);
+    }
+
+    this.repository.saveAll(installments);
+    return ExpenseResponse.from(installments.getFirst());
+  }
+
+  @Transactional
+  public ExpenseResponse updateExpense(UUID id, UpdateExpenseRequest request) {
+    Expense expense = this.findExpense(id);
+    this.ensureInstallmentsAreOnCredit(expense.isInInstallments(), request.paymentMethod());
+
+    UUID accountId = expense.getAccount().getId();
+    Category category = this.resolveCategory(request.categoryId(), accountId, expense.getCategory());
+    Card card = this.resolveCard(request.cardId(), accountId, expense.getCard());
+    this.ensureCardSupports(card, request.paymentMethod());
+
+    expense.setName(request.name());
+    expense.setDescription(request.description());
+    expense.setCategory(category);
+    expense.setCard(card);
+    expense.setPaymentMethod(request.paymentMethod());
+    expense.setAmount(request.amount());
+    expense.setExpenseDate(request.expenseDate());
+
+    return ExpenseResponse.from(this.repository.save(expense));
+  }
+
+  @Transactional
+  public void deleteExpense(UUID id) {
+    this.repository.delete(this.findExpense(id));
+  }
+
+  private void ensureInstallmentsAreOnCredit(boolean isInInstallments, PaymentMethod paymentMethod) {
+    if (isInInstallments && paymentMethod != PaymentMethod.CREDIT) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Apenas compras no crédito podem ser parceladas");
+    }
+  }
+
+  private Category resolveCategory(UUID categoryId, UUID accountId, Category current) {
+    if (categoryId == null) {
+      return null;
+    }
+
+    if (current != null && current.getId().equals(categoryId)) {
+      return current;
+    }
+
+    Category category = this.categoryRepository.findById(categoryId)
+        .filter(found -> found.getAccount().getId().equals(accountId))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria não encontrada na conta"));
+
+    if (!category.isActive()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A categoria está inativa");
+    }
+
+    return category;
+  }
+
+  private Card resolveCard(UUID cardId, UUID accountId, Card current) {
+    if (current != null && current.getId().equals(cardId)) {
+      return current;
+    }
+
+    Card card = this.cardRepository.findById(cardId)
+        .filter(found -> found.getAccount().getId().equals(accountId))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cartão não encontrado na conta"));
 
     if (!card.isActive()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O cartão está inativo");
     }
 
-    if (!card.getPaymentMethod().supports(request.paymentMethod())) {
+    return card;
+  }
+
+  private void ensureCardSupports(Card card, PaymentMethod paymentMethod) {
+    if (!card.getPaymentMethod().supports(paymentMethod)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Forma de pagamento não suportada pelo cartão");
     }
+  }
 
+  private Expense findExpense(UUID id) {
+    return this.repository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Despesa não encontrada"));
+  }
+
+  private Expense newExpense(
+      RegisterExpenseRequest request,
+      Category category,
+      Card card,
+      BigDecimal amount,
+      LocalDate expenseDate) {
     Expense expense = new Expense();
     expense.setOwner(this.userRepository.getReferenceById(request.ownerId()));
     expense.setAccount(this.accountRepository.getReferenceById(request.accountId()));
@@ -93,11 +190,35 @@ public class ExpenseService {
     expense.setCard(card);
     expense.setName(request.name());
     expense.setDescription(request.description());
-    expense.setAmount(request.amount());
+    expense.setAmount(amount);
     expense.setPaymentMethod(request.paymentMethod());
+    expense.setExpenseDate(expenseDate);
     expense.setInInstallments(request.isInInstallments());
     expense.setInstallmentsNumber(request.installmentsNumber());
+    return expense;
+  }
 
-    return ExpenseResponse.from(this.repository.save(expense));
+  private List<BigDecimal> splitAmount(BigDecimal total, int installmentsNumber) {
+    BigDecimal installments = BigDecimal.valueOf(installmentsNumber);
+    BigDecimal base = total.divide(installments, 2, RoundingMode.DOWN);
+    if (base.signum() == 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O valor é insuficiente para o número de parcelas");
+    }
+
+    BigDecimal remainder = total.subtract(base.multiply(installments));
+    List<BigDecimal> amounts = new ArrayList<>(Collections.nCopies(installmentsNumber, base));
+    amounts.set(0, base.add(remainder));
+    return amounts;
+  }
+
+  private List<LocalDate> installmentDates(RegisterExpenseRequest request) {
+    if (request.recurrenceDayOfMonth() != null) {
+      return InstallmentScheduler.byDayOfMonth(
+          request.expenseDate(), request.installmentsNumber(), request.recurrenceDayOfMonth());
+    }
+
+    RecurrenceUnit unit = request.recurrenceUnit() != null ? request.recurrenceUnit() : DEFAULT_RECURRENCE_UNIT;
+    int interval = request.recurrenceInterval() != null ? request.recurrenceInterval() : DEFAULT_RECURRENCE_INTERVAL;
+    return InstallmentScheduler.byInterval(request.expenseDate(), request.installmentsNumber(), unit, interval);
   }
 }
