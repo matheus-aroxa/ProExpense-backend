@@ -37,6 +37,11 @@ public record RegisterExpenseRequest(
   @NotNull(message = "O id da conta é obrigatório")
   UUID accountId,
 
+  UUID categoryId,
+
+  @NotNull(message = "O cartão é obrigatório")
+  UUID cardId,
+
   boolean isInInstallments,
   int installmentsNumber
 ) implements InstallmentPlan {}

@@ -10,6 +10,8 @@ public record ExpenseResponse(
   UUID id,
   UUID ownerId,
   UUID accountId,
+  UUID categoryId,
+  UUID cardId,
   String name,
   String description,
   BigDecimal amount,
@@ -21,8 +23,10 @@ public record ExpenseResponse(
   public static ExpenseResponse from(Expense expense) {
     return new ExpenseResponse(
         expense.getId(),
-        expense.getOwnerId(),
-        expense.getAccountId(),
+        expense.getOwner().getId(),
+        expense.getAccount().getId(),
+        expense.getCategory() != null ? expense.getCategory().getId() : null,
+        expense.getCard().getId(),
         expense.getName(),
         expense.getDescription(),
         expense.getAmount(),
