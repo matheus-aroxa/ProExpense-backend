@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,19 +38,6 @@ public class UserController {
   public ResponseEntity<List<UserResponse>> findAllUsers() {
     logger.info("finding all users");
     return ResponseEntity.ok(this.service.findAllUsers());
-  }
-
-  @GetMapping("/active")
-  public ResponseEntity<List<UserResponse>> findAllActiveUsers() {
-    logger.info("finding all active users");
-    return ResponseEntity.ok(this.service.findAllActiveUsers());
-  }
-
-  @PatchMapping("/{id}/deactivate")
-  public ResponseEntity<Void> deactivateUser(@PathVariable UUID id) {
-    logger.info("deactivating user: {}", id);
-    this.service.deactivateUser(id);
-    return ResponseEntity.noContent().build();
   }
 
   @PostMapping

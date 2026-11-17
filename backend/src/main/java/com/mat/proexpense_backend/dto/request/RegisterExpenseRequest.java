@@ -34,6 +34,9 @@ public record RegisterExpenseRequest(
   @NotNull(message = "O dono da despesa é obrigatório")
   UUID ownerId,
 
+  @NotNull(message = "O id da conta é obrigatório")
+  UUID accountId,
+
   boolean isInInstallments,
   int installmentsNumber
 ) implements InstallmentPlan {}

@@ -32,6 +32,9 @@ public class Expense implements InstallmentPlan {
   @NotNull
   private UUID ownerId;
 
+  @NotNull
+  private UUID accountId;
+
   @NotBlank
   @Size(max = 255)
   private String name;

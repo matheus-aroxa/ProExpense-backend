@@ -29,18 +29,6 @@ public class UserService {
         .toList();
   }
 
-  public List<UserResponse> findAllActiveUsers() {
-    return this.repository.findAllByIsActiveTrue().stream()
-        .map(UserResponse::from)
-        .toList();
-  }
-
-  public void deactivateUser(UUID id) {
-    User user = this.findUser(id);
-    user.setActive(false);
-    this.repository.save(user);
-  }
-
   private User findUser(UUID id) {
     return this.repository.findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));

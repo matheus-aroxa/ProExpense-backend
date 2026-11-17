@@ -9,6 +9,7 @@ import com.mat.proexpense_backend.enums.PaymentMethod;
 public record ExpenseResponse(
   UUID id,
   UUID ownerId,
+  UUID accountId,
   String name,
   String description,
   BigDecimal amount,
@@ -21,6 +22,7 @@ public record ExpenseResponse(
     return new ExpenseResponse(
         expense.getId(),
         expense.getOwnerId(),
+        expense.getAccountId(),
         expense.getName(),
         expense.getDescription(),
         expense.getAmount(),

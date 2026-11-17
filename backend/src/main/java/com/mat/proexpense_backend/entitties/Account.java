@@ -1,8 +1,10 @@
 package com.mat.proexpense_backend.entitties;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -10,9 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -44,12 +45,20 @@ public class Account {
   @EqualsAndHashCode.Exclude
   private User owner;
 
-  @ManyToMany
-  @JoinTable(
-      name = "account_users",
-      joinColumns = @JoinColumn(name = "account_id", foreignKey = @ForeignKey(name = "fk_account_users_account")),
-      inverseJoinColumns = @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_account_users_user")))
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
-  private Set<User> users = new HashSet<>();
+  private Set<AccountMember> members = new HashSet<>();
+
+  public Optional<AccountMember> findMember(UUID userId) {
+    return this.members.stream()
+        .filter(member -> member.getUser().getId().equals(userId))
+        .findFirst();
+  }
+
+  public AccountMember addMember(User user) {
+    AccountMember member = new AccountMember(this, user);
+    this.members.add(member);
+    return member;
+  }
 }
