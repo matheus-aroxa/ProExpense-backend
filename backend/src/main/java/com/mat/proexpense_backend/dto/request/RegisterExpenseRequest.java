@@ -1,6 +1,8 @@
 package com.mat.proexpense_backend.dto.request;
 
 import java.math.BigDecimal;
+import java.util.UUID;
+
 import com.mat.proexpense_backend.enums.PaymentMethod;
 import com.mat.proexpense_backend.validation.InstallmentPlan;
 import com.mat.proexpense_backend.validation.ValidInstallments;
@@ -28,6 +30,12 @@ public record RegisterExpenseRequest(
 
   @NotNull(message = "A forma de pagamento é obrigatória")
   PaymentMethod paymentMethod,
+
+  @NotNull(message = "O dono da despesa é obrigatório")
+  UUID ownerId,
+
+  @NotNull(message = "O id da conta é obrigatório")
+  UUID accountId,
 
   boolean isInInstallments,
   int installmentsNumber

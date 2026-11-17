@@ -29,6 +29,12 @@ public class Expense implements InstallmentPlan {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @NotNull
+  private UUID ownerId;
+
+  @NotNull
+  private UUID accountId;
+
   @NotBlank
   @Size(max = 255)
   private String name;

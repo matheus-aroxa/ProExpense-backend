@@ -2,7 +2,7 @@ spring:
   application:
     name: proexpense-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/proexpense
+    url: jdbc:postgresql://localhost:5434/proexpense
     username: admin
     password: admin
     driver-class-name: org.postgresql.Driver

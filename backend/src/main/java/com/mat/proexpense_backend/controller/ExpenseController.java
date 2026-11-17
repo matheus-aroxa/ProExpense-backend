@@ -1,5 +1,6 @@
 package com.mat.proexpense_backend.controller;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.mat.proexpense_backend.dto.request.RegisterExpenseRequest;
-import com.mat.proexpense_backend.entitties.Expense;
+import com.mat.proexpense_backend.dto.response.ExpenseResponse;
 import com.mat.proexpense_backend.service.ExpenseService;
 import jakarta.validation.Valid;
 
@@ -28,22 +29,22 @@ public class ExpenseController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Expense>> findAllExpenses() {
-    logger.info("findind all expenses");
+  public ResponseEntity<List<ExpenseResponse>> findAllExpenses() {
+    logger.info("finding all expenses");
     return ResponseEntity.ok(this.service.findAllExpenses());
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Expense> findExpense(@PathVariable UUID id) {
+  public ResponseEntity<ExpenseResponse> findExpense(@PathVariable UUID id) {
     logger.info("Finding expense by ID: {}", id);
-    return ResponseEntity.of(this.service.findExpenseById(id));
+    return ResponseEntity.ok(this.service.findExpenseById(id));
   }
 
   @PostMapping
-  public ResponseEntity<String> registerExpense(@Valid @RequestBody RegisterExpenseRequest request) {
+  public ResponseEntity<ExpenseResponse> registerExpense(@Valid @RequestBody RegisterExpenseRequest request) {
     logger.info("Registering expense");
-    this.service.registerExpense(request);
-    return ResponseEntity.ok("ok");
+    ExpenseResponse response = this.service.registerExpense(request);
+    return ResponseEntity.created(URI.create("/api/v1/expenses/" + response.id())).body(response);
   }
 
 }
