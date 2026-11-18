@@ -6,13 +6,16 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.mat.proexpense_backend.dto.request.RegisterExpenseRequest;
+import com.mat.proexpense_backend.dto.request.UpdateExpenseRequest;
 import com.mat.proexpense_backend.dto.response.ExpenseResponse;
 import com.mat.proexpense_backend.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -45,6 +48,19 @@ public class ExpenseController {
     logger.info("Registering expense");
     ExpenseResponse response = this.service.registerExpense(request);
     return ResponseEntity.created(URI.create("/api/v1/expenses/" + response.id())).body(response);
+  }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<ExpenseResponse> updateExpense(@PathVariable UUID id, @Valid @RequestBody UpdateExpenseRequest request) {
+    logger.info("Updating expense {}", id);
+    return ResponseEntity.ok(this.service.updateExpense(id, request));
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteExpense(@PathVariable UUID id) {
+    logger.info("Deleting expense {}", id);
+    this.service.deleteExpense(id);
+    return ResponseEntity.noContent().build();
   }
 
 }

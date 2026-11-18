@@ -1,6 +1,7 @@
 package com.mat.proexpense_backend.dto.response;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import com.mat.proexpense_backend.entitties.Expense;
@@ -16,8 +17,10 @@ public record ExpenseResponse(
   String description,
   BigDecimal amount,
   PaymentMethod paymentMethod,
+  LocalDate expenseDate,
   boolean isInInstallments,
-  int installmentsNumber
+  int installmentsNumber,
+  int currentInstallment
 ) {
 
   public static ExpenseResponse from(Expense expense) {
@@ -31,7 +34,9 @@ public record ExpenseResponse(
         expense.getDescription(),
         expense.getAmount(),
         expense.getPaymentMethod(),
+        expense.getExpenseDate(),
         expense.isInInstallments(),
-        expense.getInstallmentsNumber());
+        expense.getInstallmentsNumber(),
+        expense.getCurrentInstallment());
   }
 }
