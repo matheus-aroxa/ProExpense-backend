@@ -24,5 +24,9 @@ spring:
     deserialization:
       fail-on-null-for-primitives: false
 
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION_MS}
+
 server:
   port: ${PORT:8090}
