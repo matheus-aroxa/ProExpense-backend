@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -24,4 +25,11 @@ public class User {
   @NotBlank
   @NotNull
   private String name;
+
+  @Email
+  @NotNull
+  private String email;
+
+  @NotNull
+  private String password;
 }
