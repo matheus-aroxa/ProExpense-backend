@@ -47,7 +47,7 @@ public class AccountService {
     User user = this.findUser(request.userId());
 
     if (account.findMember(user.getId()).isPresent()) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Usuário já faz parte da conta");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "User is already a member of the account");
     }
 
     account.addMember(user);
@@ -63,7 +63,7 @@ public class AccountService {
   public AccountResponse deactivateMember(UUID accountId, UUID userId) {
     Account account = this.findAccount(accountId);
     if (account.getOwner().getId().equals(userId)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "O dono da conta não pode ser desativado");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Account owner cannot be deactivated");
     }
     return this.setMemberActive(accountId, userId, false);
   }
@@ -79,7 +79,7 @@ public class AccountService {
   private AccountResponse setMemberActive(UUID accountId, UUID userId, boolean active) {
     Account account = this.findAccount(accountId);
     AccountMember member = account.findMember(userId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não faz parte da conta"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not a member of the account"));
 
     member.setActive(active);
     return AccountResponse.from(this.repository.save(account));
@@ -100,11 +100,11 @@ public class AccountService {
 
   private Account findAccount(UUID id) {
     return this.repository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta não encontrada"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
   }
 
   private User findUser(UUID id) {
     return this.userRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
   }
 }

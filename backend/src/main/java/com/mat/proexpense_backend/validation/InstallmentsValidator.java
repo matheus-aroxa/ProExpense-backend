@@ -17,12 +17,12 @@ public class InstallmentsValidator implements ConstraintValidator<ValidInstallme
     int installments = plan.installmentsNumber();
 
     if (!plan.isInInstallments()) {
-      return installments == 0 || reject(context, "Compras à vista não devem informar parcelas");
+      return installments == 0 || reject(context, "Single-payment purchases must not specify installments");
     }
 
     boolean inRange = installments >= MIN_INSTALLMENTS && installments <= MAX_INSTALLMENTS;
-    return inRange || reject(context, "Compras parceladas devem ter entre "
-        + MIN_INSTALLMENTS + " e " + MAX_INSTALLMENTS + " parcelas");
+    return inRange || reject(context, "Installment purchases must have between "
+        + MIN_INSTALLMENTS + " and " + MAX_INSTALLMENTS + " installments");
   }
 
   private boolean reject(ConstraintValidatorContext context, String message) {

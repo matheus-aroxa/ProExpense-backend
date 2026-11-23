@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record UpdateCategoryRequest(
-  @NotBlank(message = "O nome é obrigatório")
-  @Size(max = 255, message = "O nome deve ter no máximo 255 caracteres")
+  @NotBlank(message = "Name is required")
+  @Size(max = 255, message = "Name must be at most 255 characters")
   String name,
 
-  @NotNull(message = "O status da categoria é obrigatório")
+  @NotNull(message = "Category status is required")
   @JsonProperty("isActive")
   Boolean isActive
 ) {}

@@ -14,7 +14,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidInstallments {
 
-  String message() default "Parcelamento inválido";
+  String message() default "Invalid installments";
 
   Class<?>[] groups() default {};
 

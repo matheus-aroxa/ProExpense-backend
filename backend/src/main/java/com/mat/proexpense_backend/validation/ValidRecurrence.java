@@ -14,7 +14,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidRecurrence {
 
-  String message() default "Recorrência inválida";
+  String message() default "Invalid recurrence";
 
   Class<?>[] groups() default {};
 

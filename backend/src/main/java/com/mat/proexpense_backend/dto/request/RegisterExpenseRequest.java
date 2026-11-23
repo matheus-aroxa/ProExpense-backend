@@ -22,34 +22,34 @@ import jakarta.validation.constraints.Size;
 @ValidInstallments
 @ValidRecurrence
 public record RegisterExpenseRequest(
-  @NotBlank(message = "O nome é obrigatório")
-  @Size(max = 255, message = "O nome deve ter no máximo 255 caracteres")
+  @NotBlank(message = "Name is required")
+  @Size(max = 255, message = "Name must be at most 255 characters")
   String name,
 
-  @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres")
+  @Size(max = 255, message = "Description must be at most 255 characters")
   String description,
 
-  @NotNull(message = "O valor é obrigatório")
-  @Positive(message = "O valor deve ser maior que zero")
-  @DecimalMax(value = "9999999999.99", message = "O valor máximo é 9.999.999.999,99")
-  @Digits(integer = 10, fraction = 2, message = "O valor deve ter no máximo 10 dígitos inteiros e 2 casas decimais")
+  @NotNull(message = "Amount is required")
+  @Positive(message = "Amount must be greater than zero")
+  @DecimalMax(value = "9999999999.99", message = "Maximum amount is 9,999,999,999.99")
+  @Digits(integer = 10, fraction = 2, message = "Amount must have at most 10 integer digits and 2 decimal places")
   BigDecimal amount,
 
-  @NotNull(message = "A forma de pagamento é obrigatória")
+  @NotNull(message = "Payment method is required")
   PaymentMethod paymentMethod,
 
-  @NotNull(message = "A data do gasto é obrigatória")
+  @NotNull(message = "Expense date is required")
   LocalDate expenseDate,
 
-  @NotNull(message = "O dono da despesa é obrigatório")
+  @NotNull(message = "Expense owner is required")
   UUID ownerId,
 
-  @NotNull(message = "O id da conta é obrigatório")
+  @NotNull(message = "Account id is required")
   UUID accountId,
 
   UUID categoryId,
 
-  @NotNull(message = "O cartão é obrigatório")
+  @NotNull(message = "Card is required")
   UUID cardId,
 
   boolean isInInstallments,
@@ -57,11 +57,11 @@ public record RegisterExpenseRequest(
 
   RecurrenceUnit recurrenceUnit,
 
-  @Positive(message = "O intervalo da recorrência deve ser maior que zero")
-  @Max(value = 365, message = "O intervalo da recorrência deve ser no máximo 365")
+  @Positive(message = "Recurrence interval must be greater than zero")
+  @Max(value = 365, message = "Recurrence interval must be at most 365")
   Integer recurrenceInterval,
 
-  @Min(value = 1, message = "O dia da recorrência deve estar entre 1 e 31")
-  @Max(value = 31, message = "O dia da recorrência deve estar entre 1 e 31")
+  @Min(value = 1, message = "Recurrence day must be between 1 and 31")
+  @Max(value = 31, message = "Recurrence day must be between 1 and 31")
   Integer recurrenceDayOfMonth
 ) implements InstallmentPlan, RecurrencePlan {}
