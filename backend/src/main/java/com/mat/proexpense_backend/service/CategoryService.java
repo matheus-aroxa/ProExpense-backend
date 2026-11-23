@@ -46,7 +46,7 @@ public class CategoryService {
   @Transactional
   public CategoryResponse registerCategory(RegisterCategoryRequest request) {
     if (!this.accountRepository.existsById(request.accountId())) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Conta não encontrada");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found");
     }
 
     this.ensureNameIsAvailable(request.accountId(), request.name(), null);
@@ -75,12 +75,12 @@ public class CategoryService {
         .filter(category -> !category.getId().equals(ignoredCategoryId))
         .anyMatch(category -> category.getName().equalsIgnoreCase(name));
     if (nameAlreadyExists) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe uma categoria com esse nome na conta");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "A category with this name already exists in the account");
     }
   }
 
   private Category findCategory(UUID id) {
     return this.repository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
   }
 }

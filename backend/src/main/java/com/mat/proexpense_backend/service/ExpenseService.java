@@ -71,7 +71,7 @@ public class ExpenseService {
 
     AccountAccessRequest accessRequest = new AccountAccessRequest(request.ownerId(), request.accountId());
     if (!this.accountService.hasAccessToTheAccount(accessRequest).hasAccess()) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário não tem acesso à conta");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to the account");
     }
 
     Category category = this.resolveCategory(request.categoryId(), request.accountId(), null);
@@ -126,7 +126,7 @@ public class ExpenseService {
 
   private void ensureInstallmentsAreOnCredit(boolean isInInstallments, PaymentMethod paymentMethod) {
     if (isInInstallments && paymentMethod != PaymentMethod.CREDIT) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Apenas compras no crédito podem ser parceladas");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only credit purchases can be paid in installments");
     }
   }
 
@@ -141,10 +141,10 @@ public class ExpenseService {
 
     Category category = this.categoryRepository.findById(categoryId)
         .filter(found -> found.getAccount().getId().equals(accountId))
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoria não encontrada na conta"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category not found in the account"));
 
     if (!category.isActive()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A categoria está inativa");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category is inactive");
     }
 
     return category;
@@ -157,10 +157,10 @@ public class ExpenseService {
 
     Card card = this.cardRepository.findById(cardId)
         .filter(found -> found.getAccount().getId().equals(accountId))
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cartão não encontrado na conta"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card not found in the account"));
 
     if (!card.isActive()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O cartão está inativo");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card is inactive");
     }
 
     return card;
@@ -168,13 +168,13 @@ public class ExpenseService {
 
   private void ensureCardSupports(Card card, PaymentMethod paymentMethod) {
     if (!card.getPaymentMethod().supports(paymentMethod)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Forma de pagamento não suportada pelo cartão");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment method not supported by the card");
     }
   }
 
   private Expense findExpense(UUID id) {
     return this.repository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Despesa não encontrada"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found"));
   }
 
   private Expense newExpense(
@@ -202,7 +202,7 @@ public class ExpenseService {
     BigDecimal installments = BigDecimal.valueOf(installmentsNumber);
     BigDecimal base = total.divide(installments, 2, RoundingMode.DOWN);
     if (base.signum() == 0) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O valor é insuficiente para o número de parcelas");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount is insufficient for the number of installments");
     }
 
     BigDecimal remainder = total.subtract(base.multiply(installments));

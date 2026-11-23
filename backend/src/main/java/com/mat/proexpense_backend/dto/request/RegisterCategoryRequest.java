@@ -7,10 +7,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record RegisterCategoryRequest(
-  @NotBlank(message = "O nome é obrigatório")
-  @Size(max = 255, message = "O nome deve ter no máximo 255 caracteres")
+  @NotBlank(message = "Name is required")
+  @Size(max = 255, message = "Name must be at most 255 characters")
   String name,
 
-  @NotNull(message = "O id da conta é obrigatório")
+  @NotNull(message = "Account id is required")
   UUID accountId
 ) {}
