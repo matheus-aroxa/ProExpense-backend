@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.mat.proexpense_backend.controller.docs.ExpenseControllerDocs;
 import com.mat.proexpense_backend.dto.request.RegisterExpenseRequest;
 import com.mat.proexpense_backend.dto.request.UpdateExpenseRequest;
 import com.mat.proexpense_backend.dto.response.ExpenseResponse;
@@ -22,7 +23,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/v1/expenses")
-public class ExpenseController {
+public class ExpenseController implements ExpenseControllerDocs {
 
   private static final Logger logger = LoggerFactory.getLogger(ExpenseController.class);
   private final ExpenseService service;
@@ -31,18 +32,21 @@ public class ExpenseController {
     this.service = service;
   }
 
+  @Override
   @GetMapping
   public ResponseEntity<List<ExpenseResponse>> findAllExpenses() {
     logger.info("finding all expenses");
     return ResponseEntity.ok(this.service.findAllExpenses());
   }
 
+  @Override
   @GetMapping("/{id}")
   public ResponseEntity<ExpenseResponse> findExpense(@PathVariable UUID id) {
     logger.info("Finding expense by ID: {}", id);
     return ResponseEntity.ok(this.service.findExpenseById(id));
   }
 
+  @Override
   @PostMapping
   public ResponseEntity<ExpenseResponse> registerExpense(@Valid @RequestBody RegisterExpenseRequest request) {
     logger.info("Registering expense");
@@ -50,12 +54,14 @@ public class ExpenseController {
     return ResponseEntity.created(URI.create("/api/v1/expenses/" + response.id())).body(response);
   }
 
+  @Override
   @PutMapping("/{id}")
   public ResponseEntity<ExpenseResponse> updateExpense(@PathVariable UUID id, @Valid @RequestBody UpdateExpenseRequest request) {
     logger.info("Updating expense {}", id);
     return ResponseEntity.ok(this.service.updateExpense(id, request));
   }
 
+  @Override
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteExpense(@PathVariable UUID id) {
     logger.info("Deleting expense {}", id);

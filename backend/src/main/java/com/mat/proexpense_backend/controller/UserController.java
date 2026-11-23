@@ -9,12 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.mat.proexpense_backend.controller.docs.UserControllerDocs;
 import com.mat.proexpense_backend.dto.response.UserResponse;
 import com.mat.proexpense_backend.service.UserService;
 
 @RestController
 @RequestMapping("api/v1/users")
-public class UserController {
+public class UserController implements UserControllerDocs {
 
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -24,12 +25,14 @@ public class UserController {
     this.service = service;
   }
 
+  @Override
   @GetMapping("/{id}")
   public ResponseEntity<UserResponse> findUserById(@PathVariable UUID id) {
     logger.info("find user by id: {}", id);
     return ResponseEntity.ok(this.service.findUserById(id));
   }
 
+  @Override
   @GetMapping
   public ResponseEntity<List<UserResponse>> findAllUsers() {
     logger.info("finding all users");
