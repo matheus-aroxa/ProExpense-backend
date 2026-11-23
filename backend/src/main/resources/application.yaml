@@ -24,6 +24,9 @@ spring:
     deserialization:
       fail-on-null-for-primitives: false
 
+springdoc:
+  default-produces-media-type: application/json
+
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION_MS}

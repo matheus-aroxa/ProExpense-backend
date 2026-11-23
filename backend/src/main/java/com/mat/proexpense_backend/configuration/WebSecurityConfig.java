@@ -44,6 +44,7 @@ public class WebSecurityConfig {
         authorizeHttpRequests
           .requestMatchers("/api/v1/auth/**").permitAll()
           .requestMatchers("/api/v1/ping").permitAll()
+          .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
           .anyRequest().authenticated()
       );
 
