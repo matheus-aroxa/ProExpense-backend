@@ -19,10 +19,17 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
   jackson:
     deserialization:
       fail-on-null-for-primitives: false
+
+springdoc:
+  default-produces-media-type: application/json
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION_MS}
 
 server:
   port: ${PORT:8090}

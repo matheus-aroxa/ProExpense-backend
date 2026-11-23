@@ -62,7 +62,7 @@ public class CardService {
   public CardResponse registerCard(RegisterCardRequest request) {
     AccountAccessRequest accessRequest = new AccountAccessRequest(request.ownerId(), request.accountId());
     if (!this.accountService.hasAccessToTheAccount(accessRequest).hasAccess()) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário não tem acesso à conta");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to the account");
     }
 
     Card card = new Card();
@@ -84,7 +84,7 @@ public class CardService {
           && this.expenseRepository.existsByCardIdAndPaymentMethod(id, method)) {
         throw new ResponseStatusException(
             HttpStatus.CONFLICT,
-            "O cartão possui despesas com uma forma de pagamento que não seria mais suportada");
+            "The card has expenses with a payment method that would no longer be supported");
       }
     }
 
@@ -98,6 +98,6 @@ public class CardService {
 
   private Card findCard(UUID id) {
     return this.repository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cartão não encontrado"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Card not found"));
   }
 }

@@ -6,10 +6,11 @@ import com.mat.proexpense_backend.entitties.User;
 
 public record UserResponse(
   UUID id,
-  String name
+  String name,
+  String email
 ) {
 
   public static UserResponse from(User user) {
-    return new UserResponse(user.getId(), user.getName());
+    return new UserResponse(user.getId(), user.getName(), user.getEmail());
   }
 }

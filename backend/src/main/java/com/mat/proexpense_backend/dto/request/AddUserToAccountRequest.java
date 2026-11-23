@@ -5,9 +5,9 @@ import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 
 public record AddUserToAccountRequest(
-  @NotNull(message = "O usuário é obrigatório")
+  @NotNull(message = "User is required")
   UUID userId,
 
-  @NotNull(message = "A conta é obrigatória")
+  @NotNull(message = "Account is required")
   UUID accountId
 ) {}

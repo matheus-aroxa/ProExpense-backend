@@ -12,21 +12,21 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 public record RegisterCardRequest(
-  @NotBlank(message = "O nome é obrigatório")
-  @Size(max = 255, message = "O nome deve ter no máximo 255 caracteres")
+  @NotBlank(message = "Name is required")
+  @Size(max = 255, message = "Name must be at most 255 characters")
   String name,
 
-  @NotNull(message = "O método de pagamento é obrigatório")
+  @NotNull(message = "Payment method is required")
   CardPaymentMethod paymentMethod,
 
-  @PositiveOrZero(message = "O limite não pode ser negativo")
-  @DecimalMax(value = "9999999999.99", message = "O limite máximo é 9.999.999.999,99")
-  @Digits(integer = 10, fraction = 2, message = "O limite deve ter no máximo 10 dígitos inteiros e 2 casas decimais")
+  @PositiveOrZero(message = "Limit cannot be negative")
+  @DecimalMax(value = "9999999999.99", message = "Maximum limit is 9,999,999,999.99")
+  @Digits(integer = 10, fraction = 2, message = "Limit must have at most 10 integer digits and 2 decimal places")
   BigDecimal limit,
 
-  @NotNull(message = "O dono do cartão é obrigatório")
+  @NotNull(message = "Card owner is required")
   UUID ownerId,
 
-  @NotNull(message = "O id da conta é obrigatório")
+  @NotNull(message = "Account id is required")
   UUID accountId
 ) {}

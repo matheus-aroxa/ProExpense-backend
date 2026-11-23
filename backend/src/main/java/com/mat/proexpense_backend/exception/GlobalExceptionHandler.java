@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -32,7 +35,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
 
     ProblemDetail body = ex.getBody();
-    body.setDetail("Um ou mais campos são inválidos");
+    body.setDetail("One or more fields are invalid");
     body.setProperty("errors", errors);
     return handleExceptionInternal(ex, body, headers, status, request);
   }
@@ -43,15 +46,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       HttpHeaders headers,
       HttpStatusCode status,
       WebRequest request) {
-    ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Corpo da requisição inválido");
+    ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Invalid request body");
 
     String field = invalidField(ex);
     if (!field.isEmpty()) {
-      body.setDetail("Um ou mais campos são inválidos");
-      body.setProperty("errors", Map.of(field, List.of("Valor inválido")));
+      body.setDetail("One or more fields are invalid");
+      body.setProperty("errors", Map.of(field, List.of("Invalid value")));
     }
 
     return handleExceptionInternal(ex, body, headers, status, request);
+  }
+
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ProblemDetail> handleAuthentication(AuthenticationException ex) {
+    ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
   }
 
   private String invalidField(HttpMessageNotReadableException ex) {

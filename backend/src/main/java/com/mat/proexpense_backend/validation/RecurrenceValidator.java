@@ -16,19 +16,19 @@ public class RecurrenceValidator implements ConstraintValidator<ValidRecurrence,
 
     if (!plan.isInInstallments()) {
       if (hasDayOfMonth) {
-        return reject(context, "Compras à vista não devem informar recorrência", "recurrenceDayOfMonth");
+        return reject(context, "Single-payment purchases must not specify recurrence", "recurrenceDayOfMonth");
       }
       if (plan.recurrenceUnit() != null) {
-        return reject(context, "Compras à vista não devem informar recorrência", "recurrenceUnit");
+        return reject(context, "Single-payment purchases must not specify recurrence", "recurrenceUnit");
       }
       if (plan.recurrenceInterval() != null) {
-        return reject(context, "Compras à vista não devem informar recorrência", "recurrenceInterval");
+        return reject(context, "Single-payment purchases must not specify recurrence", "recurrenceInterval");
       }
       return true;
     }
 
     return !(hasInterval && hasDayOfMonth)
-        || reject(context, "Informe a recorrência por intervalo ou por dia fixo, não ambos", "recurrenceDayOfMonth");
+        || reject(context, "Specify recurrence by interval or by fixed day, not both", "recurrenceDayOfMonth");
   }
 
   private boolean reject(ConstraintValidatorContext context, String message, String field) {
